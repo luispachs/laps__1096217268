@@ -16,7 +16,14 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::apiResource('entidades', EntidadController::class);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+Route::get("entities",[EntidadController::class,'index']);
+Route::post("entities/store",[EntidadController::class,'store']);
+Route::delete("entities/{id}",[EntidadController::class,'destroy']);
+Route::get("contacts",[ContactoController::class,'index']);
+Route::post("contacts/store",[ContactoController::class,'store']);
+Route::delete("contact/{id}",[ContactoController::class,'destroy']);

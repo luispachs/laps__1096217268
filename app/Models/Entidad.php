@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Entidad extends Model
 {
     use HasFactory;
+    protected $table ="entities";
+    public $timestamps =false;
+    protected $fillable =['name','nit','phone','address','email'];
 }

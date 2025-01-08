@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Entidad;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Validator;
+use PDOException;
 
 class EntidadController extends Controller
 {
@@ -17,7 +20,7 @@ class EntidadController extends Controller
     public function index()
     {
         $entidades = Entidad::all();
-        return response()->json($entidades, Response::HTTP_OK);
+        return new JsonResponse($entidades->toArray(),Response::HTTP_OK,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'GET','OPTIONS']);
     }
 
     /**
@@ -26,20 +29,55 @@ class EntidadController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request):JsonResponse
     {
-        $validatedData = $request->validate([
-            
-            'nombre' => 'required|string|max:191',
-            'nit' => 'required|string|max:191',
-            'direccion' => 'nullable|string|max:191',
-            'telefono' => 'nullable|string|max:191',
-            'email' => 'nullable|email|max:191',
-        ]);
 
-        $entidad = Entidad::create($validatedData);
-        return response()->json($entidad, Response::HTTP_CREATED);
-        
+    try{
+        $validatedData = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|string|max:191',
+                'nit' => 'required|string|max:191',
+                'address' => 'nullable|string|max:191',
+                'phone' => 'nullable|string|max:191',
+                'email' => 'nullable|email|max:191',
+            ],
+            [
+                'required'=> ':attribute es requrido',
+                'string'=>':attribute debe ser una cadena de texto',
+                'max'=> ':attibute debe tener un valor maximo de :max',
+                'email'=> ':attribute no es una email valido'
+            ],
+            [
+                'name'=>'Nombre',
+                'nit'=> 'NIT',
+                'phone'=> 'Telefono',
+                'address'=>'Dirección',
+                'email'=>'Email'
+            ]
+
+            );
+            if($validatedData->fails()){
+
+                ///return response(headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS'])->json($validatedData->errors()->toArray(), Response::HTTP_BAD_REQUEST);
+
+                return new JsonResponse($validatedData->errors()->toArray(),Response::HTTP_BAD_REQUEST,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
+            }
+
+             $entidad = Entidad::create($validatedData->getData());
+            //return response(headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS'])->json($entidad, Response::HTTP_CREATED);
+            return new JsonResponse($entidad,Response::HTTP_CREATED,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
+
+    }
+    catch(PDOException $e){
+        return new JsonResponse(['error'=> 'Error al insertar el valor, probablemente este ya exciste'],Response::HTTP_BAD_REQUEST,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
+
+    }
+    catch(\Exception $e){
+        return new JsonResponse(['error'=> 'Error Interno del Servidor'],Response::HTTP_BAD_GATEWAY,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
+
+    }
+
     }
 
     /**
