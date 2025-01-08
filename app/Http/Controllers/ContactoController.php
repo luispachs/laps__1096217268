@@ -6,7 +6,7 @@ use App\Models\Contacto;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\{Validator,Log};
 use PDOException;
 
 class ContactoController extends Controller
@@ -23,7 +23,7 @@ class ContactoController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
 
     try{
@@ -31,7 +31,6 @@ class ContactoController extends Controller
             $request->all(),
             [
                 'name' => 'required|string|max:191',
-                'entity_id' => 'required|numeric|exists:entities,id',
                 'phone' => 'nullable|string|max:191',
                 'email' => 'nullable|email|max:191',
             ],
@@ -43,7 +42,6 @@ class ContactoController extends Controller
             ],
             [
                 'name'=>'Nombre',
-                'entity_id'=> 'NIT',
                 'phone'=> 'Telefono',
                 'email'=>'Email'
             ]
@@ -51,33 +49,25 @@ class ContactoController extends Controller
             );
             if($validatedData->fails()){
 
-                ///return response(headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS'])->json($validatedData->errors()->toArray(), Response::HTTP_BAD_REQUEST);
-
                 return new JsonResponse($validatedData->errors()->toArray(),Response::HTTP_BAD_REQUEST,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
             }
 
              $entidad = Contacto::create($validatedData->getData());
-            //return response(headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS'])->json($entidad, Response::HTTP_CREATED);
             return new JsonResponse($entidad,Response::HTTP_CREATED,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
 
     }
     catch(PDOException $e){
-        return new JsonResponse(['error'=> 'Error al insertar el valor, probablemente este ya exciste'],Response::HTTP_BAD_REQUEST,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
+        Log::error($e->getMessage(),['trace'=> $e->getTraceAsString()]);
+        return new JsonResponse(['error'=> 'Error al insertar el valor, probablemente este ya existe'],Response::HTTP_BAD_REQUEST,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
 
     }
     catch(\Exception $e){
+        Log::error($e->getMessage(),['trace'=> $e->getTraceAsString()]);
         return new JsonResponse(['error'=> 'Error Interno del Servidor'],Response::HTTP_BAD_GATEWAY,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
 
     }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
 
     /**
      * Display the specified resource.

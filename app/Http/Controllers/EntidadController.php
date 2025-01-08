@@ -70,7 +70,7 @@ class EntidadController extends Controller
 
     }
     catch(PDOException $e){
-        return new JsonResponse(['error'=> 'Error al insertar el valor, probablemente este ya exciste'],Response::HTTP_BAD_REQUEST,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
+        return new JsonResponse(['error'=> 'Error al insertar el valor, probablemente este ya existe'],Response::HTTP_BAD_REQUEST,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
 
     }
     catch(\Exception $e){
@@ -109,7 +109,8 @@ class EntidadController extends Controller
         $entidad = Entidad::find($id);
 
         if (!$entidad) {
-            return response()->json(['error' => 'Entidad no encontrada'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['error'=> 'Entidad no encontrada'],Response::HTTP_NOT_FOUND,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
+
         }
 
         $validatedData = $request->validate([
@@ -120,7 +121,7 @@ class EntidadController extends Controller
         ]);
 
         $entidad->update($validatedData);
-        return response()->json($entidad, Response::HTTP_OK);
+            return new JsonResponse($entidad,Response::HTTP_CREATED,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'POST','OPTIONS']);
     }
 
     /**
