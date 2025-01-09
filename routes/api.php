@@ -22,8 +22,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::get("entities",[EntidadController::class,'index']);
+Route::delete('entities',[EntidadController::class,'deleteMuch']);
 Route::post("entities/store",[EntidadController::class,'store']);
+Route::put("entities/{id}",[EntidadController::class,'update']);
 Route::delete("entities/{id}",[EntidadController::class,'destroy']);
+
 Route::get("contacts",[ContactoController::class,'index']);
 Route::post("contacts/store",[ContactoController::class,'store']);
 Route::delete("contact/{id}",[ContactoController::class,'destroy']);
+Route::put("entities/{id}",[ContactoController::class,'update']);
+Route::delete('entities',[ContactoController::class,'deleteMuch']);
