@@ -71,9 +71,9 @@ class ContactoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Contacto $contacto)
+    public function update(Request $request, int $id)
     {
-        $entidad = Entidad::find($id);
+        $entidad = Contacto::find($id);
 
         if (!$entidad) {
             return new JsonResponse(['error'=> 'Entidad no encontrada'],Response::HTTP_NOT_FOUND,headers:["Access-Control-Allow-Origin",env('FRONT_BASE'),"Access-Control-Request-Method"=>'PUT','OPTIONS']);
